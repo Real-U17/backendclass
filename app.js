@@ -12,26 +12,22 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-
-app.get('/api/users', async(req,res)=>{ 
- try{
-   const users = await db('users'); // ตรงนี้ดึงจาก table 'users' ไว้เหมือนเดิมได้เลย
-   res.json({
-      success:true,
-      count:users.length,
-      data:users
-   });
- }catch(error){
-   res.status(500).json({error:error.message });
- }
+app.get('/api/users', async (req, res) => { 
+  try {
+    const users = await db('users'); 
+    res.json({
+       success: true,
+       count: users.length,
+       data: users
+    });
+  } catch(error) {
+    res.status(500).json({ error: error.message });
+  }
 });
-
 
 app.get('/about', (req, res) => {
   res.send('ระบบประวัติการศึกษา portfolio');
 });
-
-
 
 app.get('/api/auth/me', (req, res) => {
   res.send('ข้อมูลผู้ใช้');
@@ -40,7 +36,21 @@ app.get('/api/auth/me', (req, res) => {
 app.post('/api/auth/register', (req, res) => {
   console.log(req.body);
   res.send({ message: 'ลงทะเบียนผู้ใช้สำเร็จ' });
-  
+});
+
+// แก้ไขเพิ่ม async ตรงนี้
+app.get('/api/skills', async (req, res) => {
+  console.log(req.query);
+  try {
+    const skills = await db('skills');
+    res.json({
+      success: true,
+      count: skills.length,
+      data: skills
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.post('/api/auth/login', (req, res) => {
@@ -54,7 +64,6 @@ app.post('/api/auth/logout', (req, res) => {
 app.put('/api/auth/change-password', (req, res) => {
   res.send('เปลี่ยนรหัสผ่าน');
 });
-
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

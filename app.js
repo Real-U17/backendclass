@@ -11,6 +11,83 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
+
+app.post('/api/users', async (req, res) => {
+  console.log('req.body');
+  const { name, email, role } = req.body;
+  
+  try {
+    const [id] = await db('users')
+    .insert({ 
+      username:name,
+      email:email,
+      role:role
+    });
+    console.log('Inserted user with ID:', id);
+    res.status(201).json({ success: true, userId: id });
+    
+  } catch(error) {
+    console.error('Error inserting user:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+ 
+});
+
+
+app.put('/api/users/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, email, role } = req.body; 
+  
+  try {
+    // เก็บค่าจำนวนแถวที่ถูกอัปเดตไว้ในตัวแปร updatedRows
+    const updatedRows = await db('users')
+      .where({ id: id })
+      .update({ 
+        username: name,
+        email: email,
+        role: role
+      });
+
+    // ถ้าค่าเป็น 0 แปลว่าหา ID นี้ไม่เจอในฐานข้อมูล (ไม่มีอะไรถูกแก้ไข)
+    if (updatedRows === 0) {
+      return res.status(404).json({ success: false, message: `ไม่พบผู้ใช้ ID: ${id} นี้ในระบบ` });
+    }
+
+    res.status(200).json({ success: true, message: 'User updated successfully' });
+    console.log('Updated user with ID:', id);
+    
+  } catch(error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+
+
+
+
+app.delete('/api/users/:id', async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    // เก็บค่าจำนวนแถวที่ถูกลบไว้ในตัวแปร deletedRows
+    const deletedRows = await db('users')
+      .where({ id: id })
+      .del();
+    // ถ้าค่าเป็น 0 แปลว่าหา ID นี้ไม่เจอในฐานข้อมูล (ไม่มีอะไรถูกลบ)
+    if (deletedRows === 0) {
+      return res.status(404).json({ success: false, message: `ไม่พบผู้ใช้ ID: ${id} นี้ในระบบ` });
+    }
+
+    res.status(200).json({ success: true, message: 'User deleted successfully' });
+    console.log('Deleted user with ID:', id);
+  } catch(error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+
 // ดึงข้อมูลผู้ใช้ทั้งหมด
 app.get('/api/users', async (req, res) => { 
   try {
